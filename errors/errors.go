@@ -30,6 +30,7 @@ type StatusErr struct {
 	InternalMessage string
 	HTTPStatus      int
 	Err             error
+	Details         map[string]string
 }
 
 func (se *StatusErr) Error() string {
@@ -119,6 +120,11 @@ func EmailExists(message, internalMsg string, err ...error) *StatusErr {
 
 func DefaultError(message, internalMsg string, err ...error) *StatusErr {
 	return New(CodeDefaultError, message, internalMsg, http.StatusInternalServerError, unwrapErr(err...))
+}
+func ValidationDetails(message, internalMsg string, details map[string]string) *StatusErr {
+	se := New(CodeValidationError, message, internalMsg, http.StatusBadRequest, nil)
+	se.Details = details
+	return se
 }
 
 func IsStatusErr(err error) bool {

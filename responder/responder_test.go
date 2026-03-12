@@ -102,3 +102,25 @@ func TestError_RegularError(t *testing.T) {
 		t.Errorf("expected CodeDefaultError for regular error")
 	}
 }
+
+func TestError_WithDetails(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	details := map[string]string{
+		"email":    "invalid email format",
+		"password": "must be at least 8 characters",
+	}
+	err := errors.ValidationDetails("validation failed", "request validation", details)
+	Error(w, err, "corr-123")
+
+	if w.Code != 400 {
+		t.Errorf("expected 400, got %d", w.Code)
+	}
+
+	var res ErrorResponse
+	json.Unmarshal(w.Body.Bytes(), &res)
+
+	if res.Error.Details["email"] != "invalid email format" {
+		t.Errorf("expected email detail, got %v", res.Error.Details)
+	}
+}

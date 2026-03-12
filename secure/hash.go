@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	saltLength = 16
-	time       = 3
-	memory     = 64 * 1024
-	threads    = 4
-	keyLength  = 32
+	saltLength     = 16
+	argonTime      = 3
+	argonMemory    = 64 * 1024
+	argonThreads   = 4
+	argonKeyLength = 32
 )
 
 func HashPassword(password string) (string, error) {
@@ -33,10 +33,10 @@ func HashPassword(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	hash := argon2.IDKey([]byte(password), salt, time, memory, threads, keyLength)
+	hash := argon2.IDKey([]byte(password), salt, argonTime, argonMemory, argonThreads, argonKeyLength)
 	encodedHash := base64.RawStdEncoding.EncodeToString(hash)
 	encodedSalt := base64.RawStdEncoding.EncodeToString(salt)
-	return fmt.Sprintf("argon2id$v=%d$m=%d$t=%d$p=%d$%s$%s", argon2.Version, memory, time, threads, encodedSalt, encodedHash), nil
+	return fmt.Sprintf("argon2id$v=%d$m=%d$t=%d$p=%d$%s$%s", argon2.Version, argonMemory, argonTime, argonThreads, encodedSalt, encodedHash), nil
 }
 
 func VerifyPassword(password, hash string) (bool, error) {
@@ -47,7 +47,7 @@ func VerifyPassword(password, hash string) (bool, error) {
 	if hashSlice[0] != "argon2id" {
 		return false, errors.New("not an argon2id hash")
 	}
-	//version
+	// version
 	versionStr := strings.TrimPrefix(hashSlice[1], "v=")
 	version, err := strconv.ParseUint(versionStr, 10, 32)
 	if err != nil {
@@ -56,8 +56,7 @@ func VerifyPassword(password, hash string) (bool, error) {
 	if uint32(version) != argon2.Version {
 		return false, errors.New("unsupported version")
 	}
-	//parse params
-
+	// parse params
 	memoryStr := strings.TrimPrefix(hashSlice[2], "m=")
 	timeStr := strings.TrimPrefix(hashSlice[3], "t=")
 	threadsStr := strings.TrimPrefix(hashSlice[4], "p=")
@@ -66,30 +65,27 @@ func VerifyPassword(password, hash string) (bool, error) {
 	if err != nil {
 		return false, errors.New("failed to parse memory")
 	}
-
 	parsedTime, err := strconv.ParseUint(timeStr, 10, 32)
 	if err != nil {
 		return false, errors.New("failed to parse time")
 	}
-
 	parsedThreads, err := strconv.ParseUint(threadsStr, 10, 8)
 	if err != nil {
 		return false, errors.New("failed to parse threads")
 	}
 
-	//decode salt
+	// decode salt
 	decodedSalt, err := base64.RawStdEncoding.DecodeString(hashSlice[5])
 	if err != nil {
 		return false, errors.New("failed to decode salt")
 	}
-
-	//decode hash
+	// decode hash
 	decodedHash, err := base64.RawStdEncoding.DecodeString(hashSlice[6])
 	if err != nil {
 		return false, errors.New("failed to decode hash")
 	}
 
-	//generate hash with same params.
+	// generate hash with same params
 	got := argon2.IDKey([]byte(password), decodedSalt, uint32(parsedTime), uint32(parsedMemory), uint8(parsedThreads), uint32(len(decodedHash)))
 	match := subtle.ConstantTimeCompare(got, decodedHash) == 1
 	return match, nil
