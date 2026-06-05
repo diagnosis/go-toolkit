@@ -21,7 +21,7 @@ func (m *SMTPMailer) Send(to []string, subject, body string) error {
 
 	auth := smtp.PlainAuth("", m.config.Username, m.config.Password, m.config.Host)
 
-	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s",
+	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s",
 		m.config.From,
 		to[0],
 		subject,
