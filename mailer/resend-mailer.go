@@ -1,10 +1,10 @@
 package mailer
 
 import (
-	"fmt"
-	"net/http"
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"net/http"
 )
 
 type ResendMailer struct {
