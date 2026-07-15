@@ -2,6 +2,10 @@ package middleware
 
 import "net/http"
 
+// CORS returns middleware that sets CORS response headers. Origins listed in
+// allowedOrigins are echoed back in Access-Control-Allow-Origin with
+// credentials allowed; OPTIONS preflight requests are answered with 200
+// without calling the next handler.
 func CORS(allowedOrigins []string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

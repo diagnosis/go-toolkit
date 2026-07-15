@@ -9,10 +9,33 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	Init()
+	Init("dev")
 	log := Get()
 	if log == nil {
 		t.Error("it should initialize logger")
+	}
+
+	Init("prod")
+	log = Get()
+	if log == nil {
+		t.Error("it should initialize logger for prod")
+	}
+}
+
+func TestGet_LazyDefault(t *testing.T) {
+	mu.Lock()
+	rootLogger = nil
+	mu.Unlock()
+
+	log := Get()
+	if log == nil {
+		t.Error("Get should lazily initialize a default logger")
+	}
+	if !log.Enabled(context.Background(), slog.LevelInfo) {
+		t.Error("default logger should log at info level")
+	}
+	if log.Enabled(context.Background(), slog.LevelDebug) {
+		t.Error("default logger should not log at debug level")
 	}
 }
 

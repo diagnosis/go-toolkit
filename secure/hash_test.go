@@ -18,7 +18,7 @@ func TestHashAndVerifyPassword(t *testing.T) {
 		t.Fatal("password should match")
 	}
 
-	//verify wrong password
+	// verify wrong password
 	wrong, err := VerifyPassword("PowerNeedsToBeControlled", hash)
 	if err != nil {
 		t.Fatalf("VerifyPassword failed: %v", err)

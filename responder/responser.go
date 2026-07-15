@@ -1,14 +1,17 @@
+// Package responder writes standard JSON success and error envelopes to
+// http.ResponseWriter, tagging every response with a correlation ID.
 package responder
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/diagnosis/go-toolkit/errors"
+	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v2/logger"
 )
 
+// SuccessResponse is the JSON envelope written by JSON for successful requests.
 type SuccessResponse struct {
 	Data          any       `json:"data"`
 	CorrelationID string    `json:"correlation_id,omitempty"`
@@ -16,9 +19,10 @@ type SuccessResponse struct {
 	Timestamp     time.Time `json:"timestamp"`
 }
 
+// ErrorResponse is the JSON envelope written by Error for failed requests.
 type ErrorResponse struct {
 	Error struct {
-		Status        errors.Status     `json:"status"`
+		Status        apperr.Status     `json:"status"`
 		Message       string            `json:"message"`
 		Details       map[string]string `json:"details,omitempty"`
 		CorrelationID string            `json:"correlation_id,omitempty"`
@@ -26,6 +30,8 @@ type ErrorResponse struct {
 	} `json:"error"`
 }
 
+// JSON writes data wrapped in a SuccessResponse envelope with the given HTTP
+// status code, setting the Content-Type and X-Correlation-ID headers.
 func JSON(w http.ResponseWriter, status int, data any, correlationID string) {
 	response := &SuccessResponse{
 		Data:          data,
@@ -37,13 +43,18 @@ func JSON(w http.ResponseWriter, status int, data any, correlationID string) {
 	w.WriteHeader(status)
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		log.Printf("Failed to encode JSON response: %v", err)
+		logger.Get().Error("failed to encode JSON response", "error", err, "correlation_id", correlationID)
 	}
 }
+
+// Error writes err as an ErrorResponse envelope. If err is an *apperr.StatusErr
+// (directly or wrapped), its HTTP status, application status code, message,
+// and details are used; any other error is reported as a generic 500
+// internal server error.
 func Error(w http.ResponseWriter, err error, correlationID string) {
-	statusErr, ok := errors.AsStatusErr(err)
+	statusErr, ok := apperr.AsStatusErr(err)
 	if !ok {
-		statusErr = errors.DefaultError("Internal server error", "unknown error occurred", err)
+		statusErr = apperr.DefaultError("Internal server error", "unknown error occurred", err)
 	}
 	response := ErrorResponse{}
 	response.Error.Status = statusErr.Status
@@ -57,7 +68,6 @@ func Error(w http.ResponseWriter, err error, correlationID string) {
 	w.WriteHeader(statusErr.HTTPStatus)
 
 	if encodeErr := json.NewEncoder(w).Encode(response); encodeErr != nil {
-		log.Printf("Failed to encode error response: %v", encodeErr)
+		logger.Get().Error("failed to encode error response", "error", encodeErr, "correlation_id", correlationID)
 	}
-
 }

@@ -1,3 +1,6 @@
+// Package secure provides security primitives: password hashing, JWT signing
+// and verification, refresh-token generation and hashing, one-time passwords,
+// HMAC signatures, and OAuth user-info fetchers for Google and GitHub.
 package secure
 
 import (
@@ -20,6 +23,10 @@ const (
 	argonKeyLength = 32
 )
 
+// HashPassword hashes password with Argon2id using a random 16-byte salt and
+// returns a self-describing encoded string ("argon2id$v=...$m=...$...") that
+// embeds the parameters, salt, and hash for later verification. Passwords
+// must be 1–128 characters.
 func HashPassword(password string) (string, error) {
 	if len(password) < 1 {
 		return "", fmt.Errorf("%w: password cannot be empty", errors.New("invalid password"))
@@ -39,6 +46,10 @@ func HashPassword(password string) (string, error) {
 	return fmt.Sprintf("argon2id$v=%d$m=%d$t=%d$p=%d$%s$%s", argon2.Version, argonMemory, argonTime, argonThreads, encodedSalt, encodedHash), nil
 }
 
+// VerifyPassword checks password against an encoded hash produced by
+// HashPassword, re-deriving the key with the parameters embedded in the hash
+// and comparing in constant time. It returns whether the password matches,
+// or an error if the encoded hash cannot be parsed.
 func VerifyPassword(password, hash string) (bool, error) {
 	hashSlice := strings.Split(hash, "$")
 	if len(hashSlice) != 7 {

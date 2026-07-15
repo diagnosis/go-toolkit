@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/diagnosis/go-toolkit/logger"
+	"github.com/diagnosis/go-toolkit/v2/logger"
 )
 
 type responseWriter struct {
@@ -43,6 +43,9 @@ func (rw *responseWriter) Unwrap() http.ResponseWriter {
 	return rw.ResponseWriter
 }
 
+// RequestLogger returns middleware that logs the start and completion of
+// every request via the logger package, including method, path, response
+// status, and duration.
 func RequestLogger() func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

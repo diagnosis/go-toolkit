@@ -1,5 +1,6 @@
 package mailer
 
+// Config holds the SMTP server settings used by SMTPMailer.
 type Config struct {
 	Host     string
 	Port     int
@@ -8,6 +9,7 @@ type Config struct {
 	From     string
 }
 
+// NewConfig builds an SMTP Config from its individual settings.
 func NewConfig(
 	host string,
 	port int,

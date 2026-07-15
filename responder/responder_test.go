@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/diagnosis/go-toolkit/errors"
+	"github.com/diagnosis/go-toolkit/v2/apperr"
 )
 
 func TestJSON(t *testing.T) {
@@ -47,7 +47,7 @@ func TestJSON(t *testing.T) {
 
 func TestError(t *testing.T) {
 	w := httptest.NewRecorder()
-	err := errors.NotFound("not found", "mahmut is not found in DB")
+	err := apperr.NotFound("not found", "mahmut is not found in DB")
 
 	Error(w, err, "correlation-id-123")
 
@@ -72,8 +72,8 @@ func TestError(t *testing.T) {
 	message := errRes.Error.Message
 	status := errRes.Error.Status
 	correlationIDInResoponse := errRes.Error.CorrelationID
-	if status != errors.CodeNotFound {
-		t.Errorf("expected %v got %v", errors.CodeNotFound, status)
+	if status != apperr.CodeNotFound {
+		t.Errorf("expected %v got %v", apperr.CodeNotFound, status)
 	}
 	if message != "not found" {
 		t.Errorf("expected %s, got %s", "not found", message)
@@ -98,7 +98,7 @@ func TestError_RegularError(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to unmarshal error response")
 	}
-	if errRes.Error.Status != errors.CodeDefaultError {
+	if errRes.Error.Status != apperr.CodeDefaultError {
 		t.Errorf("expected CodeDefaultError for regular error")
 	}
 }
@@ -110,7 +110,7 @@ func TestError_WithDetails(t *testing.T) {
 		"email":    "invalid email format",
 		"password": "must be at least 8 characters",
 	}
-	err := errors.ValidationDetails("validation failed", "request validation", details)
+	err := apperr.ValidationDetails("validation failed", "request validation", details)
 	Error(w, err, "corr-123")
 
 	if w.Code != 400 {
@@ -118,7 +118,9 @@ func TestError_WithDetails(t *testing.T) {
 	}
 
 	var res ErrorResponse
-	json.Unmarshal(w.Body.Bytes(), &res)
+	if err := json.Unmarshal(w.Body.Bytes(), &res); err != nil {
+		t.Fatal("failed to unmarshal error response")
+	}
 
 	if res.Error.Details["email"] != "invalid email format" {
 		t.Errorf("expected email detail, got %v", res.Error.Details)
