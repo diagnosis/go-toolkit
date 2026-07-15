@@ -121,7 +121,12 @@ func TestVerifyRefreshToken(t *testing.T) {
 	t.Run("tampered stored hash does not verify", func(t *testing.T) {
 		raw, _ := GenerateRefreshToken()
 		stored := HashRefreshToken(raw)
-		tampered := stored[:len(stored)-1] + "f"
+		// flip the last hex digit to a different value so the tamper is guaranteed
+		last := "f"
+		if stored[len(stored)-1] == 'f' {
+			last = "0"
+		}
+		tampered := stored[:len(stored)-1] + last
 
 		if VerifyRefreshToken(raw, tampered) {
 			t.Fatal("tampered hash should not verify")

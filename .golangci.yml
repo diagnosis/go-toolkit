@@ -1,0 +1,21 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - gocritic
+    - misspell
+    - revive
+    - unconvert
+  settings:
+    govet:
+      enable:
+        - shadow
+    revive:
+      rules:
+        - name: exported
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/diagnosis/go-toolkit/logger"
+	"github.com/diagnosis/go-toolkit/v2/logger"
 )
 
 func TestCorrelationID(t *testing.T) {

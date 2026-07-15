@@ -1,3 +1,6 @@
+// Package validator accumulates field validation errors (required,
+// email, password strength, length, and minimum-value checks) and
+// converts them into an apperr validation error.
 package validator
 
 import (
@@ -7,25 +10,33 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/diagnosis/go-toolkit/errors"
+	"github.com/diagnosis/go-toolkit/v2/apperr"
 )
 
+// Validator collects validation errors per field. The zero value is not
+// ready to use; construct one with New. Only the first error recorded for
+// a field is kept.
 type Validator struct {
 	errors map[string]string
 }
 
+// New returns an empty Validator ready to collect field errors.
 func New() *Validator {
 	return &Validator{
 		errors: make(map[string]string),
 	}
 }
 
+// Required records an error for field when value is empty or whitespace.
 func (v *Validator) Required(field, value string) {
 	if strings.TrimSpace(value) == "" {
 		v.addError(field, fmt.Sprintf("%s is required", humanize(field)))
 	}
 }
 
+// Email records an error for field when value is not a valid email
+// address. Empty values are skipped; combine with Required if the field
+// is mandatory.
 func (v *Validator) Email(field, value string) {
 	value = strings.TrimSpace(value)
 	if value == "" {
@@ -38,6 +49,9 @@ func (v *Validator) Email(field, value string) {
 	}
 }
 
+// Password records an error for field when value is shorter than 8 or
+// longer than 128 characters, or lacks an uppercase letter, a lowercase
+// letter, or a digit. Empty values are skipped.
 func (v *Validator) Password(field, value string) {
 	if value == "" {
 		return
@@ -73,6 +87,8 @@ func (v *Validator) Password(field, value string) {
 	}
 }
 
+// MinLength records an error for field when value has fewer than min
+// characters. Empty values are skipped.
 func (v *Validator) MinLength(field, value string, min int) {
 	if value == "" {
 		return
@@ -83,6 +99,8 @@ func (v *Validator) MinLength(field, value string, min int) {
 	}
 }
 
+// MaxLength records an error for field when value has more than max
+// characters. Empty values are skipped.
 func (v *Validator) MaxLength(field, value string, max int) {
 	if value == "" {
 		return
@@ -93,18 +111,21 @@ func (v *Validator) MaxLength(field, value string, max int) {
 	}
 }
 
+// Min records an error for field when value is less than min.
 func (v *Validator) Min(field string, value, min float64) {
 	if value < min {
 		v.addError(field, fmt.Sprintf("%s must be at least %v", humanize(field), min))
 	}
 }
 
-func (v *Validator) Errors() *errors.StatusErr {
+// Errors returns the collected errors as an apperr validation error with
+// per-field details, or nil when every check passed.
+func (v *Validator) Errors() *apperr.StatusErr {
 	if len(v.errors) == 0 {
 		return nil
 	}
 
-	return errors.ValidationDetails(
+	return apperr.ValidationDetails(
 		"validation failed",
 		"validation failed",
 		v.errors,

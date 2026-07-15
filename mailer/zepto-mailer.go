@@ -7,11 +7,14 @@ import (
 	"net/http"
 )
 
+// ZeptoMailer sends email through the ZeptoMail HTTP API.
 type ZeptoMailer struct {
 	apiKey string
 	from   ZeptoAddress
 }
 
+// ZeptoAddress is an email address with an optional display name, in the
+// shape the ZeptoMail API expects.
 type ZeptoAddress struct {
 	Address string `json:"address"`
 	Name    string `json:"name"`
@@ -28,6 +31,8 @@ type zeptoTo struct {
 	EmailAddress ZeptoAddress `json:"email_address"`
 }
 
+// NewZeptoMailer returns a ZeptoMailer that authenticates with apiKey and
+// sends from the given address and display name.
 func NewZeptoMailer(apiKey, fromEmail, fromName string) *ZeptoMailer {
 	return &ZeptoMailer{
 		apiKey: apiKey,
@@ -38,6 +43,7 @@ func NewZeptoMailer(apiKey, fromEmail, fromName string) *ZeptoMailer {
 	}
 }
 
+// Send delivers an HTML email to the given recipients via the ZeptoMail API.
 func (m *ZeptoMailer) Send(to []string, subject, body string) error {
 	recipients := make([]zeptoTo, len(to))
 	for i, addr := range to {
@@ -70,7 +76,7 @@ func (m *ZeptoMailer) Send(to []string, subject, body string) error {
 	if err != nil {
 		return fmt.Errorf("failed to send email: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return fmt.Errorf("zepto API error: status %d", resp.StatusCode)

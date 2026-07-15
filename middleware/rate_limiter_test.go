@@ -1,12 +1,16 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"golang.org/x/time/rate"
+
+	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v2/responder"
 )
 
 // handler is a simple 200 OK handler for testing
@@ -49,6 +53,23 @@ func TestRateLimit_RejectsOverBurst(t *testing.T) {
 
 	if w.Code != http.StatusTooManyRequests {
 		t.Errorf("expected 429, got %d", w.Code)
+	}
+	if ct := w.Header().Get("Content-Type"); ct != "application/json" {
+		t.Errorf("expected Content-Type application/json, got %s", ct)
+	}
+
+	var errRes responder.ErrorResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &errRes); err != nil {
+		t.Fatalf("429 body should be the JSON error envelope, got: %s", w.Body.String())
+	}
+	if errRes.Error.Status != apperr.CodeTooManyRequests {
+		t.Errorf("expected status %v, got %v", apperr.CodeTooManyRequests, errRes.Error.Status)
+	}
+	if errRes.Error.Message != "too many requests" {
+		t.Errorf("expected message %q, got %q", "too many requests", errRes.Error.Message)
+	}
+	if errRes.Error.Timestamp.IsZero() {
+		t.Error("expected envelope timestamp to be set")
 	}
 }
 

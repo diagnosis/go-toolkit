@@ -1,4 +1,4 @@
-package errors
+package apperr
 
 import (
 	"errors"
@@ -75,11 +75,11 @@ func TestHelpers(t *testing.T) {
 
 func TestAsStatusErr(t *testing.T) {
 	statusErr := BadRequest("bad", "bad")
-	coverted, ok := AsStatusErr(statusErr)
+	converted, ok := AsStatusErr(statusErr)
 	if !ok {
 		t.Error("AsStatusErr should succeed for StatusErr")
 	}
-	if coverted.Status != CodeBadRequest {
+	if converted.Status != CodeBadRequest {
 		t.Error("Converted error should preserve status")
 	}
 

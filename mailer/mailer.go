@@ -1,3 +1,5 @@
+// Package mailer sends HTML email through SMTP, Resend, or ZeptoMail
+// behind a single Mailer interface.
 package mailer
 
 import (
@@ -5,18 +7,25 @@ import (
 	"net/smtp"
 )
 
+// Mailer sends an HTML email with the given subject and body to one or
+// more recipients.
 type Mailer interface {
 	Send(to []string, subject, body string) error
 }
 
+// SMTPMailer sends email through a plain SMTP server using the settings
+// in a Config.
 type SMTPMailer struct {
 	config *Config
 }
 
+// NewSMTPMailer returns an SMTPMailer that sends through the server
+// described by cfg.
 func NewSMTPMailer(cfg *Config) *SMTPMailer {
 	return &SMTPMailer{config: cfg}
 }
 
+// Send delivers an HTML email to the given recipients via SMTP.
 func (m *SMTPMailer) Send(to []string, subject, body string) error {
 
 	auth := smtp.PlainAuth("", m.config.Username, m.config.Password, m.config.Host)

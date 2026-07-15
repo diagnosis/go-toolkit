@@ -8,6 +8,10 @@ import (
 	"time"
 
 	"golang.org/x/time/rate"
+
+	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v2/logger"
+	"github.com/diagnosis/go-toolkit/v2/responder"
 )
 
 type client struct {
@@ -32,6 +36,8 @@ func newRateLimiter(requestPerSecond rate.Limit, burst int, ttl time.Duration) *
 		ttl:     ttl,
 	}
 
+	// TODO: cleanup goroutine has no stop mechanism — revisit with graceful
+	// shutdown (goroutine lifecycle).
 	go l.cleanup()
 	return l
 }
@@ -72,6 +78,11 @@ func (l *rateLimiter) getLimiter(ip string) *rate.Limiter {
 
 	return lim
 }
+
+// RateLimit returns middleware that rate-limits requests per client IP using
+// a token bucket (requestPerSecond refill rate, burst capacity). Idle client
+// entries are evicted after ttl. When the limit is exceeded it responds 429
+// with the standard JSON error envelope and a Retry-After header.
 func RateLimit(requestPerSecond rate.Limit, burst int, ttl time.Duration) func(handler http.Handler) http.Handler {
 	rateLimiter := newRateLimiter(requestPerSecond, burst, ttl)
 	return func(next http.Handler) http.Handler {
@@ -79,14 +90,12 @@ func RateLimit(requestPerSecond rate.Limit, burst int, ttl time.Duration) func(h
 			ip := realIP(r)
 			limiter := rateLimiter.getLimiter(ip)
 			if !limiter.Allow() {
-				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("Retry-After", "1")
-				w.WriteHeader(http.StatusTooManyRequests)
-				_, _ = w.Write([]byte(`{"error":"too many requests"}`))
+				correlationID, _ := logger.GetCorrelationID(r.Context())
+				responder.Error(w, apperr.TooManyRequests("too many requests", "rate limit exceeded"), correlationID)
 				return
 			}
 			next.ServeHTTP(w, r)
-
 		})
 	}
 }
