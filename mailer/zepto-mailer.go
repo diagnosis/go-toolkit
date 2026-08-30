@@ -2,6 +2,7 @@ package mailer
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -44,7 +45,7 @@ func NewZeptoMailer(apiKey, fromEmail, fromName string) *ZeptoMailer {
 }
 
 // Send delivers an HTML email to the given recipients via the ZeptoMail API.
-func (m *ZeptoMailer) Send(to []string, subject, body string) error {
+func (m *ZeptoMailer) Send(ctx context.Context, to []string, subject, body string) error {
 	recipients := make([]zeptoTo, len(to))
 	for i, addr := range to {
 		recipients[i] = zeptoTo{
@@ -84,3 +85,5 @@ func (m *ZeptoMailer) Send(to []string, subject, body string) error {
 
 	return nil
 }
+
+var _ Mailer = (*ZeptoMailer)(nil)

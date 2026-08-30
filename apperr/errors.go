@@ -30,6 +30,7 @@ const (
 	CodeEmailExists
 	CodeDefaultError
 	CodeTooManyRequests
+	CodeUnprocessableContent
 )
 
 // StatusErr is an error enriched with an application Status, a client-facing
@@ -157,6 +158,10 @@ func ValidationDetails(message, internalMsg string, details map[string]string) *
 	se := New(CodeValidationError, message, internalMsg, http.StatusBadRequest, nil)
 	se.Details = details
 	return se
+}
+// UnprocessableContent returns a StatusErr with CodeUnprocessableContent and HTTP 422
+func UnprocessableContent(message, internalMsg string, err ...error) *StatusErr{
+	return New(CodeUnprocessableContent, message, internalMsg, http.StatusUnprocessableEntity, unwrapErr(err...))
 }
 
 // IsStatusErr reports whether err is, or wraps, a *StatusErr.

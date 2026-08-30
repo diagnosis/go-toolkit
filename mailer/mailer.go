@@ -3,14 +3,16 @@
 package mailer
 
 import (
+	"context"
 	"fmt"
 	"net/smtp"
+	"strings"
 )
 
 // Mailer sends an HTML email with the given subject and body to one or
 // more recipients.
 type Mailer interface {
-	Send(to []string, subject, body string) error
+	Send(ctx context.Context,to []string, subject, body string) error
 }
 
 // SMTPMailer sends email through a plain SMTP server using the settings
@@ -26,13 +28,15 @@ func NewSMTPMailer(cfg *Config) *SMTPMailer {
 }
 
 // Send delivers an HTML email to the given recipients via SMTP.
-func (m *SMTPMailer) Send(to []string, subject, body string) error {
+// ctx is accepted for interface compliance; net/smtp cannot honor cancellation.
+func (m *SMTPMailer) Send(ctx context.Context,to []string, subject, body string) error {
 
 	auth := smtp.PlainAuth("", m.config.Username, m.config.Password, m.config.Host)
+	tos := strings.Join(to, ",")
 
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s",
 		m.config.From,
-		to[0],
+		tos,
 		subject,
 		body,
 	)
