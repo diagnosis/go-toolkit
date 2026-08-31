@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
-	"github.com/diagnosis/go-toolkit/v2/logger"
-	"github.com/diagnosis/go-toolkit/v2/responder"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
+	"github.com/diagnosis/go-toolkit/v3/logger"
+	"github.com/diagnosis/go-toolkit/v3/responder"
 )
 
 // userIDKey is the private context key under which the authenticated user ID

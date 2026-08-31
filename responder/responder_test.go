@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
 )
 
 func TestJSON(t *testing.T) {

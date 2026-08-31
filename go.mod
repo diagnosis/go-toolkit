@@ -1,4 +1,4 @@
-module github.com/diagnosis/go-toolkit/v2
+module github.com/diagnosis/go-toolkit/v3
 
 go 1.25.0
 

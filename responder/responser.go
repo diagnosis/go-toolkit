@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
-	"github.com/diagnosis/go-toolkit/v2/logger"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
+	"github.com/diagnosis/go-toolkit/v3/logger"
 )
 
 // SuccessResponse is the JSON envelope written by JSON for successful requests.

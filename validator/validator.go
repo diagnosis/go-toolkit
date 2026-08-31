@@ -10,7 +10,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
 )
 
 // Validator collects validation errors per field. The zero value is not

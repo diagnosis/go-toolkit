@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
 )
 
 const googleUserInfoURL = "https://openidconnect.googleapis.com/v1/userinfo"

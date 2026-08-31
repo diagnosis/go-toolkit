@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
 )
 
 // ResendMailer sends email through the Resend HTTP API.
@@ -70,7 +70,6 @@ func (m *ResendMailer) Send(ctx context.Context, to []string, subject, body stri
 		if err = json.Unmarshal(b, &resendJSON); err != nil {
 			resendJSON.Message = string(b)
 		}
-
 
 		return apperr.Internal("email delivery failed", fmt.Sprintf("resend status=%d: %s", resp.StatusCode, resendJSON.Message))
 	}

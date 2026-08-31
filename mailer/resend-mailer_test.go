@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
 )
 
 func TestResendMailer_SendsAuthAndPayload(t *testing.T) {

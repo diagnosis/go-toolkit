@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/diagnosis/go-toolkit/v2/apperr"
-	"github.com/diagnosis/go-toolkit/v2/responder"
+	"github.com/diagnosis/go-toolkit/v3/apperr"
+	"github.com/diagnosis/go-toolkit/v3/responder"
 )
 
 // handler is a simple 200 OK handler for testing

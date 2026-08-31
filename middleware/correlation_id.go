@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/diagnosis/go-toolkit/v2/logger"
+	"github.com/diagnosis/go-toolkit/v3/logger"
 	"github.com/google/uuid"
 )
 

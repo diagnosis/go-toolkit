@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/diagnosis/go-toolkit/v2/logger"
+	"github.com/diagnosis/go-toolkit/v3/logger"
 )
 
 type responseWriter struct {
