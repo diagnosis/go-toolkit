@@ -31,13 +31,41 @@ const (
 	CodeDefaultError
 	CodeTooManyRequests
 	CodeUnprocessableContent
+	CodeEmailNotVerified
 )
+
+var codeNames = map[Status]string{
+	CodeBadRequest: "bad_request",
+	CodeUnauthorized: "unauthorized",
+	CodeForbidden: "forbidden",
+	CodeNotFound: "not_found",
+	CodeConflict: "conflict",
+	CodeInternalError: "internal_error",
+	CodeDatabaseError: "database_error",
+	CodeValidationError: "validation_error",
+	CodeTokenErr: "token_error",
+	CodeInvalidCredentials: "invalid_credentials",
+	CodeAccountInactive: "account_inactive",
+	CodeEmailExists: "email_exists",
+	CodeDefaultError: "default_error",
+	CodeTooManyRequests: "too_many_requests",
+	CodeUnprocessableContent: "unprocessable_content",
+	CodeEmailNotVerified: "email_not_verified",
+}
+// Code returns name of error code
+func (s Status) Code() string{
+	if name, ok := codeNames[s]; ok {
+		return name
+	}
+	return "unknown"
+}
 
 // StatusErr is an error enriched with an application Status, a client-facing
 // Message, an operator-facing InternalMessage, the HTTP status to respond
 // with, an optional wrapped cause, and optional per-field Details.
 type StatusErr struct {
 	Status          Status
+	Code string
 	Message         string
 	InternalMessage string
 	HTTPStatus      int
@@ -67,6 +95,7 @@ func (se *StatusErr) Unwrap() error {
 func New(status Status, message, internalMsg string, httpStatus int, err error) *StatusErr {
 	return &StatusErr{
 		Status:          status,
+		Code:  			status.Code(),
 		Message:         message,
 		InternalMessage: internalMsg,
 		HTTPStatus:      httpStatus,
@@ -162,6 +191,10 @@ func ValidationDetails(message, internalMsg string, details map[string]string) *
 // UnprocessableContent returns a StatusErr with CodeUnprocessableContent and HTTP 422
 func UnprocessableContent(message, internalMsg string, err ...error) *StatusErr{
 	return New(CodeUnprocessableContent, message, internalMsg, http.StatusUnprocessableEntity, unwrapErr(err...))
+}
+
+func EmailNotVerified(message, internalMsg string, err ...error) *StatusErr{
+	return New(CodeEmailNotVerified, message, internalMsg, http.StatusForbidden, unwrapErr(err...))
 }
 
 // IsStatusErr reports whether err is, or wraps, a *StatusErr.

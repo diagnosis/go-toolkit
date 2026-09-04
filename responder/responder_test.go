@@ -71,12 +71,16 @@ func TestError(t *testing.T) {
 	}
 	message := errRes.Error.Message
 	status := errRes.Error.Status
+	errCode := errRes.Error.Code
 	correlationIDInResoponse := errRes.Error.CorrelationID
 	if status != apperr.CodeNotFound {
 		t.Errorf("expected %v got %v", apperr.CodeNotFound, status)
 	}
 	if message != "not found" {
 		t.Errorf("expected %s, got %s", "not found", message)
+	}
+	if errCode != "not_found"{
+		t.Errorf("expected %s, got %s", apperr.CodeNotFound.Code(), errCode )
 	}
 	if correlationIDInResoponse != "correlation-id-123" {
 		t.Errorf("expected %s, got %s", "correlation-id-123", correlationIDInResoponse)
