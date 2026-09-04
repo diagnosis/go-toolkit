@@ -23,6 +23,7 @@ type SuccessResponse struct {
 type ErrorResponse struct {
 	Error struct {
 		Status        apperr.Status     `json:"status"`
+		Code          string `json:"code"`
 		Message       string            `json:"message"`
 		Details       map[string]string `json:"details,omitempty"`
 		CorrelationID string            `json:"correlation_id,omitempty"`
@@ -58,6 +59,7 @@ func Error(w http.ResponseWriter, err error, correlationID string) {
 	}
 	response := ErrorResponse{}
 	response.Error.Status = statusErr.Status
+	response.Error.Code = statusErr.Status.Code()
 	response.Error.Message = statusErr.Message
 	response.Error.Details = statusErr.Details
 	response.Error.Timestamp = time.Now().UTC()

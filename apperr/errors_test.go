@@ -38,26 +38,37 @@ func TestErrorWrapping(t *testing.T) {
 
 }
 
+func TestStatus_Code_Exhaustive(t *testing.T){
+	for s := CodeBadRequest; s <= CodeEmailNotVerified; s++ {
+		if s.Code() == "unknown"{
+			t.Errorf("Status %d has no code name in codeNames", s)
+		}
+	}
+}
+
 func TestHelpers(t *testing.T) {
 	tests := []struct {
 		name       string
 		err        *StatusErr
 		wantStatus Status
+		wantCode string
 		wantHTTP   int
 	}{
-		{"NotFound", NotFound("test", "test"), CodeNotFound, 404},
-		{"BadRequest", BadRequest("test", "test"), CodeBadRequest, 400},
-		{"Internal", Internal("test", "test"), CodeInternalError, 500},
-		{"Unauthorized", Unauthorized("test", "test"), CodeUnauthorized, 401},
-		{"Forbidden", Forbidden("test", "test"), CodeForbidden, 403},
-		{"Conflict", Conflict("test", "test"), CodeConflict, 409},
-		{"Validation", Validation("test", "test"), CodeValidationError, 400},
-		{"Database", Database("test", "test"), CodeDatabaseError, 500},
-		{"TokenError", TokenError("test", "test"), CodeTokenErr, 401},
-		{"InvalidCredentials", InvalidCredentials("test", "test"), CodeInvalidCredentials, 401},
-		{"AccountInactive", AccountInactive("test", "test"), CodeAccountInactive, 403},
-		{"EmailExists", EmailExists("test", "test"), CodeEmailExists, 409},
-		{"DefaultError", DefaultError("test", "test"), CodeDefaultError, 500},
+		{"NotFound", NotFound("test", "test"), CodeNotFound,CodeNotFound.Code() ,404},
+		{"BadRequest", BadRequest("test", "test"), CodeBadRequest, CodeBadRequest.Code(), 400},
+		{"Internal", Internal("test", "test"), CodeInternalError, CodeInternalError.Code(), 500},
+		{"Unauthorized", Unauthorized("test", "test"), CodeUnauthorized, CodeUnauthorized.Code(), 401},
+		{"Forbidden", Forbidden("test", "test"), CodeForbidden, CodeForbidden.Code(), 403},
+		{"Conflict", Conflict("test", "test"), CodeConflict, CodeConflict.Code(),409},
+		{"Validation", Validation("test", "test"), CodeValidationError, CodeValidationError.Code(), 400},
+		{"Database", Database("test", "test"), CodeDatabaseError, CodeDatabaseError.Code(),500},
+		{"TokenError", TokenError("test", "test"), CodeTokenErr, CodeTokenErr.Code(),401},
+		{"InvalidCredentials", InvalidCredentials("test", "test"), CodeInvalidCredentials, CodeInvalidCredentials.Code(),401},
+		{"AccountInactive", AccountInactive("test", "test"), CodeAccountInactive, CodeAccountInactive.Code(), 403},
+		{"EmailExists", EmailExists("test", "test"), CodeEmailExists, CodeEmailExists.Code(),409},
+		{"DefaultError", DefaultError("test", "test"), CodeDefaultError, CodeDefaultError.Code(),500},
+		{ "EmailNotVerified", EmailNotVerified("test", "test"),  CodeEmailNotVerified, CodeEmailNotVerified.Code(),403},
+		{"UnprocessableContent", UnprocessableContent("test", "test"), CodeUnprocessableContent, CodeUnprocessableContent.Code(), 422},
 	}
 
 	t.Parallel()
