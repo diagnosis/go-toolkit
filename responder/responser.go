@@ -59,7 +59,7 @@ func Error(w http.ResponseWriter, err error, correlationID string) {
 	}
 	response := ErrorResponse{}
 	response.Error.Status = statusErr.Status
-	response.Error.Code = statusErr.Status.Code()
+	response.Error.Code = statusErr.Code
 	response.Error.Message = statusErr.Message
 	response.Error.Details = statusErr.Details
 	response.Error.Timestamp = time.Now().UTC()
